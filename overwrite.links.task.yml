@@ -1,0 +1,3 @@
+overwrite.entities:
+  class: \Drupal\Core\Menu\LocalTaskDefault
+  deriver: \Drupal\overwrite\Plugin\Derivative\OverwriteLocalTask
