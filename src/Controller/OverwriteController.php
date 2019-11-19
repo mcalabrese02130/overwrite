@@ -22,5 +22,27 @@ class OverwriteController extends ControllerBase {
     return \Drupal::formBuilder()->getForm(\Drupal\overwrite\Form\OverwriteForm::class, $related_entity);
   }
 
+  /**
+   *  Get Overwrites that are related to the given entity criteria
+   *
+   *  @param string $entity_type
+   *  @param $entity_id
+   *
+   *  @return array
+   *  array of \Drupal\overwrite\Entity\Overwrite
+   **/
+  public static function getOverwrites(string $entity_type, $entity_id) {
+//    if(\Drupal::database()->schema()->tableExists('overwrite')) {
+      $overwrite_ids =  \Drupal::entityQuery('overwrite')
+        ->condition('related_entity_type', $entity_type)
+        ->condition('related_entity_id', $entity_id)
+        ->execute();
+      if(!empty($overwrite_ids)) {
+        return \Drupal\overwrite\Entity\Overwrite::loadMultiple($overwrite_ids);
+      }
+ //   }
+    return [];
+  }
+ 
 }
 

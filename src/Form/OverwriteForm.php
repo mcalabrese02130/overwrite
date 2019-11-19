@@ -24,7 +24,7 @@ class OverwriteForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, Entity $entity = NULL) {//$entity = NULL) {//, $entity_id = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, EntityInterface $entity = NULL) {
     if($entity == NULL) {
       return $form;
     }
@@ -46,8 +46,10 @@ class OverwriteForm extends FormBase {
     $field_options = [];
     $label_fieldname = \Drupal::entityTypeManager()->getDefinition($entity_type)->getKey('label');
     foreach($bundle_fields as $fieldname => $field) {
-      if(get_class($field) == 'Drupal\field\Entity\FieldConfig' ||
-        $fieldname == $label_fieldname) {
+      if(
+        get_class($field) == 'Drupal\field\Entity\FieldConfig' ||
+        $fieldname == $label_fieldname
+      ) {
         $field_options[$fieldname] = $field->getLabel();
       }
     }
@@ -86,11 +88,7 @@ class OverwriteForm extends FormBase {
       $overwrite->delete();
     }
 
-    $overwrite_ids = \Drupal::entityQuery('overwrite')
-      ->condition('related_entity_type', $entity_type)
-      ->condition('related_entity_id', $entity_id)
-      ->execute();
-    $overwrites = entity_load_multiple('overwrite', $overwrite_ids);
+    $overwrites = \Drupal\overwrite\Controller\OverwriteController::getOverwrites($entity_type, $entity_id);
     foreach($overwrites as $overwrite) {
       $this->addOverwrite($form['field_overwrites'], $form_state, $overwrite);
     }

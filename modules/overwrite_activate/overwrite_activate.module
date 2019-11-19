@@ -1,18 +1,5 @@
 <?php
 
-use Drupal\comment\CommentInterface;
-use Drupal\Core\Database\Database;
-use Drupal\Core\Database\Query\AlterableInterface;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Logger\RfcLogLevel;
-use Drupal\Core\Menu\LocalTaskDefault;
-use Drupal\Core\Render\Element;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
-use Drupal\Core\Utility\Error;
-use Drupal\overwrite\EntityTypeInfo;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  *  implements hook_entity_load();
@@ -32,12 +19,8 @@ function overwrite_activate_entity_load(array $entities, $entity_type_id) {
       continue;
     }
 
-    $overwrite_ids =  \Drupal::entityQuery('overwrite')
-      ->condition('related_entity_type', $entity_type_id)
-      ->condition('related_entity_id', $entity->id())
-      ->execute();
-    if(!empty($overwrite_ids)) {
-      $overwrites = \Drupal\overwrite\Entity\Overwrite::loadMultiple(array_keys($overwrite_ids));
+    $overwrites = \Drupal\overwrite\Controller\OverwriteController::getOverwrites($entity_type_id, $entity->id());
+    if(!empty($overwrites)) {
       foreach($overwrites as $overwrite) {
         $values = $overwrite->getFieldValue();
         $fieldname = $overwrite->getRelatedFieldname();
