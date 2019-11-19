@@ -10,6 +10,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\overwrite\Entity\Overwrite;
+use Drupal\Core\Cache\Cache;
 
 
 class OverwriteForm extends FormBase {
@@ -241,5 +242,6 @@ class OverwriteForm extends FormBase {
       }
       $overwrite->save();
     }
+    Cache::invalidateTags([$values['entity_type'] . ':' . $values['entity_id']]);
   }
 }
