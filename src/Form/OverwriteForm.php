@@ -125,7 +125,15 @@ class OverwriteForm extends FormBase {
     return $form;
   }
 
-  private function addOverwrite(&$form, &$form_state, $overwrite) {
+  /**
+   *  Helper function adds the field widget for the passed $overwrite
+   *  to the $form array
+   *
+   *  @param array $form
+   *  @param FormStateInterface $form_state
+   *  @param Overwrite $overwrite
+   */
+  private function addOverwrite(array &$form, FormStateInterface &$form_state, Overwrite $overwrite) {
     $overwrite_parents = $form['#parents'];
     $overwrite_parents[] = $overwrite->id();
     $field_parents = $overwrite_parents;
