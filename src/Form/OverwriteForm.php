@@ -2,17 +2,18 @@
 
 namespace Drupal\overwrite\Form;
 
+use Drupal\Core\Field\FieldItemList;
+use Drupal\Core\Field\EntityReferenceFieldItemList;
+use Drupal\overwrite\Controller\OverwriteController;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\linkwell_sites\Entity\LinkwellSiteGroup;
-use Drupal\Core\Entity\EntityFieldManager;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\overwrite\Entity\Overwrite;
 use Drupal\Core\Cache\Cache;
 
-
+/**
+ *
+ */
 class OverwriteForm extends FormBase {
 
   /**
@@ -26,13 +27,13 @@ class OverwriteForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, EntityInterface $entity = NULL) {
-    if($entity == NULL) {
+    if ($entity == NULL) {
       return $form;
     }
 
     $entity_type = $entity->getEntityTypeId();
     $entity_id = $entity->id();
-    
+
     $form['entity_type'] = [
       '#type' => 'value',
       '#value' => $entity_type,
@@ -42,12 +43,12 @@ class OverwriteForm extends FormBase {
       '#type' => 'value',
       '#value' => $entity_id,
     ];
-    
+
     $bundle_fields = \Drupal::entityManager()->getFieldDefinitions($entity_type, $entity->bundle());
     $field_options = [];
     $label_fieldname = \Drupal::entityTypeManager()->getDefinition($entity_type)->getKey('label');
-    foreach($bundle_fields as $fieldname => $field) {
-      if(
+    foreach ($bundle_fields as $fieldname => $field) {
+      if (
         get_class($field) == 'Drupal\field\Entity\FieldConfig' ||
         $fieldname == $label_fieldname
       ) {
@@ -84,25 +85,25 @@ class OverwriteForm extends FormBase {
     ];
 
     $trigger = $form_state->getTriggeringElement();
-    if(substr($trigger['#name'], 0, 17) == 'remove-overwrite-') {
+    if (substr($trigger['#name'], 0, 17) == 'remove-overwrite-') {
       $overwrite = Overwrite::load($trigger['#overwrite_id']);
       $overwrite->delete();
     }
 
-    $overwrites = \Drupal\overwrite\Controller\OverwriteController::getOverwrites($entity_type, $entity_id);
-    foreach($overwrites as $overwrite) {
+    $overwrites = OverwriteController::getOverwrites($entity_type, $entity_id);
+    foreach ($overwrites as $overwrite) {
       $this->addOverwrite($form['field_overwrites'], $form_state, $overwrite);
     }
-    
-    if($trigger['#name'] == 'field_add') {
+
+    if ($trigger['#name'] == 'field_add') {
       $values = $form_state->getValues();
       $overwrite = entity_create('overwrite', [
         'related_entity_type' => $values['entity_type'],
 
-        'related_entity_id' => (integer)$values['entity_id'],
+        'related_entity_id' => (integer) $values['entity_id'],
 
         'related_fieldname' => $values['field_select'],
-        ]);
+      ]);
       $overwrite->save();
       $form['overwrite_added'] = [
         '#type' => 'value',
@@ -113,7 +114,7 @@ class OverwriteForm extends FormBase {
 
     $form['field_overwrites'][0] = [
       'empty' => [
-        '#markup' => '<div id="field-overwrites"></div>'
+        '#markup' => '<div id="field-overwrites"></div>',
       ],
     ];
 
@@ -126,12 +127,14 @@ class OverwriteForm extends FormBase {
   }
 
   /**
-   *  Helper function adds the field widget for the passed $overwrite
-   *  to the $form array
+   * Helper function adds the field widget for the passed $overwrite to the $form array.
    *
-   *  @param array $form
-   *  @param FormStateInterface $form_state
-   *  @param Overwrite $overwrite
+   * @param array $form
+   *   Form array passed by reference.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   FormStateInterface passed by reference.
+   * @param \Drupal\overwrite\Entity\Overwrite $overwrite
+   *   Overwrite entity to be added.
    */
   private function addOverwrite(array &$form, FormStateInterface &$form_state, Overwrite $overwrite) {
     $overwrite_parents = $form['#parents'];
@@ -142,7 +145,7 @@ class OverwriteForm extends FormBase {
       '#prefix' => '<div id="overwrite-' . $overwrite->id() . '">',
       '#suffix' => '</div>',
       '#parents' => $overwrite_parents,
-   ];
+    ];
 
     $entity = entity_load($overwrite->getRelatedEntityType(), $overwrite->getRelatedEntityId());
     $entity_form = \Drupal::entityTypeManager()
@@ -150,20 +153,20 @@ class OverwriteForm extends FormBase {
       ->load($overwrite->getRelatedEntityType() . '.' . $entity->bundle() . '.default');
 
     $field_renderer = $entity_form->getRenderer($overwrite->getRelatedFieldname());
-    if($field_renderer) {
+    if ($field_renderer) {
       $empty_entity = entity_create($overwrite->getRelatedEntityType(), ['type' => $entity->bundle()]);
 
       $field = $overwrite->getDefinitionOfField();
-      if(!$field) {
+      if (!$field) {
         return;
       }
-      if($field->getType() == 'entity_reference') {
-        $field_item_list = \Drupal\Core\Field\EntityReferenceFieldItemList::createInstance($field, 'overwrite_fields[' . $overwrite->id() . ']', $entity->getTypedData());
+      if ($field->getType() == 'entity_reference') {
+        $field_item_list = EntityReferenceFieldItemList::createInstance($field, 'overwrite_fields[' . $overwrite->id() . ']', $entity->getTypedData());
         $overwrite_field_values = $overwrite->getFieldValue()->getValue();
         $field_item_list->setValue($overwrite_field_values);
       }
       else {
-        $field_item_list = \Drupal\Core\Field\FieldItemList::createInstance($field, 'overwrite_fields[' . $overwrite->id() . ']', $entity->getTypedData());
+        $field_item_list = FieldItemList::createInstance($field, 'overwrite_fields[' . $overwrite->id() . ']', $entity->getTypedData());
         $overwrite_field_item_list = $overwrite->getFieldValue();
         $field_item_list->setValue($overwrite_field_item_list->getValue());
       }
@@ -202,10 +205,9 @@ class OverwriteForm extends FormBase {
     }
   }
 
-
   /**
-   *  Callback function to remove an overwrite
-   **/
+   * Callback function to remove an overwrite.
+   */
   public function removeOverwriteCallback(array $form, FormStateInterface $form_state) {
     return [
       '#markup' => '',
@@ -213,34 +215,34 @@ class OverwriteForm extends FormBase {
   }
 
   /**
-   *  Callback function to add an overwrite
-   **/
+   * Callback function to add an overwrite.
+   */
   public function addFieldCallback(array $form, FormStateInterface $form_state) {
-   return $form['field_overwrites'][$form_state->getValue('overwrite_added')];
+    return $form['field_overwrites'][$form_state->getValue('overwrite_added')];
   }
-
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
-    foreach($values['field_overwrites'] as $overwrite_id => $overwrite_data) {
+    foreach ($values['field_overwrites'] as $overwrite_id => $overwrite_data) {
       $overwrite = Overwrite::load($overwrite_id);
       $overwrite->setMethod($overwrite_data['method']);
 
       $fieldname = $overwrite_data['fieldname'];
-      if($fieldname) {
+      if ($fieldname) {
         $data = $overwrite_data[$fieldname];
-        switch($overwrite_data['field_type']) {
+        switch ($overwrite_data['field_type']) {
           case 'entity_reference':
-	    if(isset($data['target_id'])) {
-	      $data = $data['target_id'];
-	    }
-	    break;
+            if (isset($data['target_id'])) {
+              $data = $data['target_id'];
+            }
+            break;
+
           case 'image':
-            foreach($data as &$data_entry){
-              if(isset($data_entry['fids'][0])) {
+            foreach ($data as &$data_entry) {
+              if (isset($data_entry['fids'][0])) {
                 $data_entry['target_id'] = $data_entry['fids'][0];
               }
             }
@@ -252,4 +254,5 @@ class OverwriteForm extends FormBase {
     }
     Cache::invalidateTags([$values['entity_type'] . ':' . $values['entity_id']]);
   }
+
 }

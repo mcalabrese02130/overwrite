@@ -1,12 +1,17 @@
 <?php
 
+/**
+ * @file
+ */
+
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\overwrite\EntityTypeInfo;
 
 /**
  * Implements hook_entity_type_alter().
  *
- * Adds 'overwrite' link template 
+ * Adds 'overwrite' link template .
+ *
  * @see EntityTypeInfo.php
  */
 function overwrite_entity_type_alter(array &$entity_types) {
@@ -17,8 +22,9 @@ function overwrite_entity_type_alter(array &$entity_types) {
 
 /**
  * Implements hook_entity_operation().
- * 
- * Adds 'Overwrite' tab
+ *
+ * Adds 'Overwrite' tab.
+ *
  * @see EntityTypeInfo.php
  */
 function overwrite_entity_operation(EntityInterface $entity) {
@@ -26,4 +32,3 @@ function overwrite_entity_operation(EntityInterface $entity) {
     ->getInstanceFromDefinition(EntityTypeInfo::class)
     ->entityOperation($entity);
 }
-

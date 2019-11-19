@@ -5,13 +5,11 @@ namespace Drupal\overwrite\Routing;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteSubscriberBase;
-use Drupal\Core\Routing\RoutingEvents;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
  * Subscriber for Overwrite routes.
- *
  */
 class RouteSubscriber extends RouteSubscriberBase {
 
@@ -60,7 +58,7 @@ class RouteSubscriber extends RouteSubscriberBase {
         ->addDefaults([
           '_controller' => '\Drupal\overwrite\Controller\OverwriteController::overwriteDefinition',
           '_title' => 'Overwrite',
-          ])
+        ])
         ->addRequirements([
           '_permission' => 'administer site content',
         ])
@@ -68,9 +66,10 @@ class RouteSubscriber extends RouteSubscriberBase {
         ->setOption('_overwrite_entity_type_id', $entity_type_id)
         ->setOption('parameters', [
           $entity_type_id  => ['type' => 'entity:' . $entity_type_id],
-          ]);
-  
+        ]);
+
       return $route;
     }
   }
+
 }

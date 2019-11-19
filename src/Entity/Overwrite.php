@@ -2,9 +2,7 @@
 
 namespace Drupal\overwrite\Entity;
 
-use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\field\Entity\FieldConfig;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 
@@ -25,6 +23,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
  * )
  */
 class Overwrite extends ContentEntityBase implements OverwriteInterface {
+
   /**
    * {@inheritdoc}
    */
@@ -34,7 +33,7 @@ class Overwrite extends ContentEntityBase implements OverwriteInterface {
 
   /**
    * {@inheritdoc}
-   */ 
+   */
   public function getRelatedEntityId() {
     return $this->get('related_entity_id')->value;
   }
@@ -55,14 +54,14 @@ class Overwrite extends ContentEntityBase implements OverwriteInterface {
 
   /**
    * {@inheritdoc}
-   */ 
+   */
   public function getMethod() {
     return $this->get('method')->value;
   }
 
   /**
    * {@inheritdoc}
-   */ 
+   */
   public function setMethod($method) {
     $this->set('method', $method);
   }
@@ -82,7 +81,7 @@ class Overwrite extends ContentEntityBase implements OverwriteInterface {
     $bundle_fields = $this->entityManager()->getFieldDefinitions($this->getRelatedEntityType(), $entity->bundle());
     return $bundle_fields[$this->getRelatedFieldname()];
   }
-  
+
   /**
    * {@inheritdoc}
    */
@@ -108,4 +107,5 @@ class Overwrite extends ContentEntityBase implements OverwriteInterface {
 
     return $fields;
   }
+
 }

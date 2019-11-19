@@ -20,7 +20,7 @@ class OverwriteLocalTask extends DeriverBase implements ContainerDeriverInterfac
   use StringTranslationTrait;
 
   /**
-   * The entity manager
+   * The entity manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
@@ -76,4 +76,5 @@ class OverwriteLocalTask extends DeriverBase implements ContainerDeriverInterfac
 
     return $this->derivatives;
   }
+
 }

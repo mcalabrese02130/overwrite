@@ -4,21 +4,23 @@ namespace Drupal\overwrite;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- *  Manipulates entity type information.
+ * Manipulates entity type information.
  *
  *  This class contains primarily bridged hooks for compile-time or
  *  cache-clear-time hooks. Runtime hooks should be placed in
  *  EntityOperations.
- **/
+ */
 class EntityTypeInfo implements ContainerInjectionInterface {
 
   use StringTranslationTrait;
 
+  /**
+   *
+   */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('current_user')
@@ -31,10 +33,10 @@ class EntityTypeInfo implements ContainerInjectionInterface {
    * This is an alter hook bridge.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface[] $entity_types
-   * The master entity type list to alter.
+   *   The master entity type list to alter.
    *
    * @see hook_entity_type_alter()
-   **/
+   */
   public function entityTypeAlter(array &$entity_types) {
     foreach ($entity_types as $entity_type_id => $entity_type) {
       if (
@@ -48,22 +50,23 @@ class EntityTypeInfo implements ContainerInjectionInterface {
   }
 
   /**
-   *  Creates 'Overwrite' link for the overwrite link template.
-   *  
-   *  @param \Drupal\Core\Entity\EntityInterface $entity
+   * Creates 'Overwrite' link for the overwrite link template.
    *
-   *  @return array
-   **/
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *
+   * @return array
+   */
   public function entityOperation(EntityInterface $entity) {
-    if($entity->hasLinkTemplate('overwrite')) {
+    if ($entity->hasLinkTemplate('overwrite')) {
       return [
         'overwrite' => [
           'title' => $this->t('Overwrite'),
           'weight' => 0,
           'url' => $entity->toUrl('overwrite'),
         ],
-     ];
+      ];
     }
     return [];
   }
+
 }

@@ -1,37 +1,46 @@
 <?php
 
+/**
+ * @file
+ */
 
 /**
- *  implements hook_entity_load();
+ * Implements hook_entity_load();.
+ */use Drupal\overwrite\Controller\OverwriteController;
+
+/**
+ *
  */
 function overwrite_activate_entity_load(array $entities, $entity_type_id) {
-  //Do not apply overwrites to admin routes such as
-  // the entity edit route
+  // Do not apply overwrites to admin routes such as
+  // the entity edit route.
   $current_route = \Drupal::routeMatch()->getRouteObject();
-  if(!$current_route || $current_route->getOption('_admin_route')) {
+  if (!$current_route || $current_route->getOption('_admin_route')) {
     return;
   }
 
-  foreach($entities as $entity) {
+  foreach ($entities as $entity) {
     $entity_type = $entity->getEntityType();
 
-    if(!$entity_type->hasLinkTemplate('overwrite')) {
+    if (!$entity_type->hasLinkTemplate('overwrite')) {
       continue;
     }
-    $overwrites = \Drupal\overwrite\Controller\OverwriteController::getOverwrites($entity_type_id, $entity->id());
-    if(!empty($overwrites)) {
-      foreach($overwrites as $overwrite) {
+    $overwrites = OverwriteController::getOverwrites($entity_type_id, $entity->id());
+    if (!empty($overwrites)) {
+      foreach ($overwrites as $overwrite) {
         $values = $overwrite->getFieldValue();
         $fieldname = $overwrite->getRelatedFieldname();
-        switch($overwrite->getMethod()) {
+        switch ($overwrite->getMethod()) {
           case 'replace':
             $entity->{$fieldname}->setValue($values->getValue());
             break;
+
           case 'append':
-            foreach($values as $value) {
+            foreach ($values as $value) {
               $entity->{$fieldname}->appendItem($value->getValue());
             }
             break;
+
           case 'prepend':
             $field_values = $entity->{$fieldname}->getValue();
             $entity->{$fieldname}->setValue(array_merge($values->getValue(), $field_values));
@@ -41,4 +50,3 @@ function overwrite_activate_entity_load(array $entities, $entity_type_id) {
     }
   }
 }
-
