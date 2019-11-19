@@ -44,6 +44,7 @@ class OverwriteForm extends FormBase {
       '#value' => $entity_id,
     ];
 
+    //Get an array of fields associated with the entity bundle
     $bundle_fields = \Drupal::entityManager()->getFieldDefinitions($entity_type, $entity->bundle());
     $field_options = [];
     $label_fieldname = \Drupal::entityTypeManager()->getDefinition($entity_type)->getKey('label');
@@ -147,6 +148,7 @@ class OverwriteForm extends FormBase {
       '#parents' => $overwrite_parents,
     ];
 
+    //Get the entity related to $overwrite.
     $entity = entity_load($overwrite->getRelatedEntityType(), $overwrite->getRelatedEntityId());
     $entity_form = \Drupal::entityTypeManager()
       ->getStorage('entity_form_display')
@@ -160,7 +162,10 @@ class OverwriteForm extends FormBase {
       if (!$field) {
         return;
       }
+
+      // Create FieldItemList with data from $overwrite.
       if ($field->getType() == 'entity_reference') {
+        // Entity reference fields are a special case for how the data is stored.
         $field_item_list = EntityReferenceFieldItemList::createInstance($field, 'overwrite_fields[' . $overwrite->id() . ']', $entity->getTypedData());
         $overwrite_field_values = $overwrite->getFieldValue()->getValue();
         $field_item_list->setValue($overwrite_field_values);
@@ -170,6 +175,7 @@ class OverwriteForm extends FormBase {
         $overwrite_field_item_list = $overwrite->getFieldValue();
         $field_item_list->setValue($overwrite_field_item_list->getValue());
       }
+      //Render the field widget.
       $form[$overwrite->id()]['field'] = $field_renderer->form($field_item_list, $form[$overwrite->id()], $form_state);
 
       $form[$overwrite->id()]['method'] = [
