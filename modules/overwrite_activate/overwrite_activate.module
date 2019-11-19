@@ -5,20 +5,19 @@
  *  implements hook_entity_load();
  */
 function overwrite_activate_entity_load(array $entities, $entity_type_id) {
-  $current_path = \Drupal::service('path.current')->getPath();
+  //Do not apply overwrites to admin routes such as
+  // the entity edit route
+  $current_route = \Drupal::routeMatch()->getRouteObject();
+  if(!$current_route || $current_route->getOption('_admin_route')) {
+    return;
+  }
+
   foreach($entities as $entity) {
     $entity_type = $entity->getEntityType();
 
     if(!$entity_type->hasLinkTemplate('overwrite')) {
-        continue;
-    }
-
-    //Do not apply overwrites to Entity Form
-    $entity_edit_form = $entity->toUrl('edit-form');
-    if($entity_edit_form && $current_path == $entity_edit_form->toString()) {
       continue;
     }
-
     $overwrites = \Drupal\overwrite\Controller\OverwriteController::getOverwrites($entity_type_id, $entity->id());
     if(!empty($overwrites)) {
       foreach($overwrites as $overwrite) {
