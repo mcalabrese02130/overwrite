@@ -44,9 +44,9 @@ class OverwriteForm extends FormBase {
       '#value' => $entity_id,
     ];
 
-    //Get an array of fields associated with the entity bundle
-    $bundle_fields = \Drupal::entityManager()->getFieldDefinitions($entity_type, $entity->bundle());
+    // Get an array of fields associated with the entity bundle
     $field_options = [];
+    $bundle_fields = \Drupal::entityManager()->getFieldDefinitions($entity_type, $entity->bundle());
     $label_fieldname = \Drupal::entityTypeManager()->getDefinition($entity_type)->getKey('label');
     foreach ($bundle_fields as $fieldname => $field) {
       if (
@@ -148,16 +148,18 @@ class OverwriteForm extends FormBase {
       '#parents' => $overwrite_parents,
     ];
 
-    //Get the entity related to $overwrite.
+    // Get the entity related to $overwrite.
     $entity = entity_load($overwrite->getRelatedEntityType(), $overwrite->getRelatedEntityId());
+
+    // Get form associated with the entity
     $entity_form = \Drupal::entityTypeManager()
       ->getStorage('entity_form_display')
       ->load($overwrite->getRelatedEntityType() . '.' . $entity->bundle() . '.default');
 
+    // Get renderer for the field
     $field_renderer = $entity_form->getRenderer($overwrite->getRelatedFieldname());
-    if ($field_renderer) {
-      $empty_entity = entity_create($overwrite->getRelatedEntityType(), ['type' => $entity->bundle()]);
 
+    if ($field_renderer) {
       $field = $overwrite->getDefinitionOfField();
       if (!$field) {
         return;

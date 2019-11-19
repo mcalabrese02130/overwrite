@@ -1,6 +1,6 @@
 name: Overwrite Activate
 type: module
-description: Allows for the overwriting of a specified field.
+description: Activates Overwrite entity content.
 core: 8.x
 package: Custom
 dependencies:
