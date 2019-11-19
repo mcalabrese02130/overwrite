@@ -25,10 +25,8 @@ class EntityTypeInfo implements ContainerInjectionInterface {
     );
   }
 
-
-
   /**
-   * Adds devel links to appropriate entity types.
+   * Adds overwrite links to appropriate entity types.
    *
    * This is an alter hook bridge.
    *
@@ -39,22 +37,33 @@ class EntityTypeInfo implements ContainerInjectionInterface {
    **/
   public function entityTypeAlter(array &$entity_types) {
     foreach ($entity_types as $entity_type_id => $entity_type) {
-      if ($entity_type->getFormClass('edit') && $entity_type->hasLinkTemplate('edit-form') && $entity_type->hasLinkTemplate('canonical')) {
+      if (
+        $entity_type->getFormClass('edit') &&
+        $entity_type->hasLinkTemplate('edit-form') &&
+        $entity_type->hasLinkTemplate('canonical')
+      ) {
         $entity_type->setLinkTemplate('overwrite', '/overwrite/' . $entity_type_id . '/{' . $entity_type_id . '}');
       }
     }
   }
 
+  /**
+   *  Creates 'Overwrite' link for the overwrite link template.
+   *  
+   *  @param \Drupal\Core\Entity\EntityInterface $entity
+   *
+   *  @return array
+   **/
   public function entityOperation(EntityInterface $entity) {
     if($entity->hasLinkTemplate('overwrite')) {
-      return array(
-        'overwrite' => array(
+      return [
+        'overwrite' => [
           'title' => $this->t('Overwrite'),
           'weight' => 0,
           'url' => $entity->toUrl('overwrite'),
-        )
-      );
+        ],
+     ];
     }
-    return array();
+    return [];
   }
 }

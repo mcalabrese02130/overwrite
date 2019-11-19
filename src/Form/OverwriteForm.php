@@ -31,19 +31,19 @@ class OverwriteForm extends FormBase {
 
     $entity_type = $entity->getEntityTypeId();
     $entity_id = $entity->id();
-    //$entity = entity_load($entity_type, $entity_id);
-    $form['entity_type'] = array(
+    
+    $form['entity_type'] = [
       '#type' => 'value',
       '#value' => $entity_type,
-    );
+    ];
 
-    $form['entity_id'] = array(
+    $form['entity_id'] = [
       '#type' => 'value',
       '#value' => $entity_id,
-    );
+    ];
     
     $bundle_fields = \Drupal::entityManager()->getFieldDefinitions($entity_type, $entity->bundle());
-    $field_options = array();
+    $field_options = [];
     $label_fieldname = \Drupal::entityTypeManager()->getDefinition($entity_type)->getKey('label');
     foreach($bundle_fields as $fieldname => $field) {
       if(get_class($field) == 'Drupal\field\Entity\FieldConfig' ||
@@ -52,33 +52,33 @@ class OverwriteForm extends FormBase {
       }
     }
 
-    $form['field_select'] = array(
+    $form['field_select'] = [
       '#type' => 'select',
       '#options' => $field_options,
       '#title' => $this->t('Field'),
-    );
-    $form['field_add'] = array(
+    ];
+    $form['field_add'] = [
       '#type' => 'button',
       '#value' => $this->t('Add Field'),
       '#name' => 'field_add',
-      '#ajax' => array(
+      '#ajax' => [
         'method' => 'prepend',
         'callback' => '::addFieldCallback',
         'wrapper' => 'field-overwrites',
-      ),
-    );
+      ],
+    ];
 
-    $form['field_overwrites'] = array(
+    $form['field_overwrites'] = [
       '#tree' => TRUE,
-      '#parents' => array('field_overwrites'),
-      '#type' => 'fieldset',//'table',
+      '#parents' => ['field_overwrites'],
+      '#type' => 'fieldset',
       '#responsive' => FALSE,
-      '#header' => array(
+      '#header' => [
         'field' => $this->t('Field'),
         'method' => $this->t('Method'),
         'remove' => $this->t('Action'),
-      ),
-    );
+      ],
+    ];
 
     $trigger = $form_state->getTriggeringElement();
     if(substr($trigger['#name'], 0, 17) == 'remove-overwrite-') {
@@ -105,23 +105,23 @@ class OverwriteForm extends FormBase {
         'related_fieldname' => $values['field_select'],
         ]);
       $overwrite->save();
-      $form['overwrite_added'] = array(
+      $form['overwrite_added'] = [
         '#type' => 'value',
         '#value' => $overwrite->id(),
-      );
+      ];
       $this->addOverwrite($form['field_overwrites'], $form_state, $overwrite);
     }
 
-    $form['field_overwrites'][0] = array(
-      'empty' => array(
-      '#markup' => '<div id="field-overwrites"></div>'
-      ),
-    );
+    $form['field_overwrites'][0] = [
+      'empty' => [
+        '#markup' => '<div id="field-overwrites"></div>'
+      ],
+    ];
 
-    $form['submit'] = array(
+    $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save'),
-    );
+    ];
 
     return $form;
   }
@@ -131,11 +131,11 @@ class OverwriteForm extends FormBase {
     $overwrite_parents[] = $overwrite->id();
     $field_parents = $overwrite_parents;
     $field_parents[] = 'field';
-    $form[$overwrite->id()] = array(
+    $form[$overwrite->id()] = [
       '#prefix' => '<div id="overwrite-' . $overwrite->id() . '">',
       '#suffix' => '</div>',
       '#parents' => $overwrite_parents,
-   );
+   ];
 
     $entity = entity_load($overwrite->getRelatedEntityType(), $overwrite->getRelatedEntityId());
     $entity_form = \Drupal::entityTypeManager()
@@ -144,7 +144,7 @@ class OverwriteForm extends FormBase {
 
     $field_renderer = $entity_form->getRenderer($overwrite->getRelatedFieldname());
     if($field_renderer) {
-      $empty_entity = entity_create($overwrite->getRelatedEntityType(), array('type' => $entity->bundle()));
+      $empty_entity = entity_create($overwrite->getRelatedEntityType(), ['type' => $entity->bundle()]);
 
       $field = $overwrite->getDefinitionOfField();
       if(!$field) {
@@ -162,51 +162,52 @@ class OverwriteForm extends FormBase {
       }
       $form[$overwrite->id()]['field'] = $field_renderer->form($field_item_list, $form[$overwrite->id()], $form_state);
 
-      $form[$overwrite->id()]['method'] = array(
+      $form[$overwrite->id()]['method'] = [
         '#title' => $this->t('Method'),
         '#type' => 'select',
-        '#options' => array(
+        '#options' => [
           'replace' => $this->t('Replace'),
           'prepend' => $this->t('Prepend'),
           'append' => $this->t('Append'),
-        ),
+        ],
         '#default_value' => $overwrite->getMethod(),
-      );
-      $form[$overwrite->id()]['remove'] = array(
+      ];
+      $form[$overwrite->id()]['remove'] = [
         '#type' => 'button',
         '#value' => $this->t('Remove'),
         '#name' => 'remove-overwrite-' . $overwrite->id(),
         '#overwrite_id' => $overwrite->id(),
-        '#ajax' => array(
+        '#ajax' => [
           'wrapper' => 'overwrite-' . $overwrite->id(),
-//          'overwrite_id' => $overwrite->id(),
           'callback' => '::removeOverwriteCallback',
           'method' => 'replace',
-        ),
-      );
-      $form[$overwrite->id()]['field_type'] = array(
+        ],
+      ];
+      $form[$overwrite->id()]['field_type'] = [
         '#type' => 'value',
         '#value' => $field ? $field->getType() : NULL,
-      );
+      ];
 
-      $form[$overwrite->id()]['fieldname'] = array(
+      $form[$overwrite->id()]['fieldname'] = [
         '#type' => 'value',
         '#value' => $overwrite->getRelatedFieldname(),
-      );
- 
-
-
+      ];
     }
   }
 
 
+  /**
+   *  Callback function to remove an overwrite
+   **/
   public function removeOverwriteCallback(array $form, FormStateInterface $form_state) {
-    return array(
+    return [
       '#markup' => '',
-    );
+    ];
   }
 
-
+  /**
+   *  Callback function to add an overwrite
+   **/
   public function addFieldCallback(array $form, FormStateInterface $form_state) {
    return $form['field_overwrites'][$form_state->getValue('overwrite_added')];
   }
@@ -215,32 +216,28 @@ class OverwriteForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-
-  
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
-    //$form_state->setRebuild(TRUE) 
     foreach($values['field_overwrites'] as $overwrite_id => $overwrite_data) {
       $overwrite = Overwrite::load($overwrite_id);
-      
       $overwrite->setMethod($overwrite_data['method']);
 
       $fieldname = $overwrite_data['fieldname'];
       if($fieldname) {
         $data = $overwrite_data[$fieldname];
         switch($overwrite_data['field_type']) {
-        case 'entity_reference':
-          if(isset($data['target_id'])) {
-            $data = $data['target_id'];
-          }
-          break;
-        case 'image':
-          foreach($data as &$data_entry){
-            if(isset($data_entry['fids'][0])) {
-              $data_entry['target_id'] = $data_entry['fids'][0];
+          case 'entity_reference':
+	    if(isset($data['target_id'])) {
+	      $data = $data['target_id'];
+	    }
+	    break;
+          case 'image':
+            foreach($data as &$data_entry){
+              if(isset($data_entry['fids'][0])) {
+                $data_entry['target_id'] = $data_entry['fids'][0];
+              }
             }
             break;
-          }
         }
         $overwrite->setFieldValue($data);
       }

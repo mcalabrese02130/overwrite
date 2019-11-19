@@ -25,11 +25,16 @@ use Drupal\Core\Field\BaseFieldDefinition;
  * )
  */
 class Overwrite extends ContentEntityBase implements OverwriteInterface {
-
+  /**
+   * {@inheritdoc}
+   */
   public function getRelatedEntityType() {
     return $this->get('related_entity_type')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */ 
   public function getRelatedEntityId() {
     return $this->get('related_entity_id')->value;
   }
@@ -41,41 +46,47 @@ class Overwrite extends ContentEntityBase implements OverwriteInterface {
     $this->set('value', $value);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getFieldValue() {
     return $this->get('value');
   }
 
+  /**
+   * {@inheritdoc}
+   */ 
   public function getMethod() {
     return $this->get('method')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */ 
   public function setMethod($method) {
     $this->set('method', $method);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getRelatedFieldname() {
     return $this->get('related_fieldname')->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getDefinitionOfField() {
     $entity = entity_load($this->getRelatedEntityType(), $this->getRelatedEntityId());
-    /*$field_config = FieldConfig::loadByName($this->getRelatedEntityType(), $entity->bundle(), $this->getRelatedFieldname()); 
-    if($field_config) {
-      return $field_config;
-    }*/
-    $bundle_fields = \Drupal::entityManager()->getFieldDefinitions($this->getRelatedEntityType(), $entity->bundle());
+    $bundle_fields = $this->entityManager()->getFieldDefinitions($this->getRelatedEntityType(), $entity->bundle());
     return $bundle_fields[$this->getRelatedFieldname()];
-    //dsm(\Drupal::entityTypeManager()->getDefinition($this->getRelatedEntityType()));
-    return NULL;
   }
-  
   
   /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    //$fields = parent::baseFieldDefinitions($entity_type);
-
     $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Overwrite ID'))
       ->setReadOnly(TRUE);
@@ -97,19 +108,4 @@ class Overwrite extends ContentEntityBase implements OverwriteInterface {
 
     return $fields;
   }
-
-
-/*
-  public function __construct(Entity $entity, $fieldname) {
-    $connection = \Drupal::database();
-    $connection->insert('overwrite')
-      ->fields([
-        'entity_type' => $entity->getEntityTypeId(),
-        'entity_id' => $entity->id(),
-        'fieldname' => $fieldname
-      ])
-      ->execute();
-  }
- */
-
 }

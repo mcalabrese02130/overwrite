@@ -5,40 +5,64 @@ namespace Drupal\overwrite\Entity;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 
-/**
- * Provides an interface for defining Linkwell site group entities.
- *
- * @ingroup linkwell_sites
- */
 interface OverwriteInterface extends  ContentEntityInterface {
 
-  // Add get/set methods for your configuration properties here.
-
   /**
-   * Gets the Linkwell site group name.
-   *
-   * @return string
-   *   Name of the Linkwell site group.
-   */
-
+   * Setter function for the field value of the Overwrite entity 
+   **/
   public function setFieldValue($value);
-  public function getFieldValue();
-  public function getRelatedEntityType();
-  public function getRelatedEntityId();
+
   /**
-   * Sets the Linkwell site group name.
+   *  Getter function for the field value of the Overwrite entity
+   **/
+  public function getFieldValue();
+
+  /**
+   *  Gets the Entity Type of the entity that is having
+   *  the Overwrite applied to.
    *
-   * @param string $name
-   *   The Linkwell site group name.
+   *  @return string
+   **/
+  public function getRelatedEntityType();
+
+  /**
+   *  Gets the Entity Id of the entity that is having
+   *  the Overwrite applied to.
    *
-   * @return \Drupal\linkwell_sites\Entity\LinkwellSiteGroupInterface
-   *   The called Linkwell site group entity.
-   */
-  public function setMethod($method);
+   *  @return int
+   **/
+  public function getRelatedEntityId();
   
+  /**
+   *  Setter function for the method of overwriting a field
+   *  
+   *  @param string $method
+   *  valid values include:
+   *   append
+   *   prepend
+   *   replace
+   *   
+   **/
+  public function setMethod($method);
+   
+  /**
+   *  Getter function for the method of overwriting a field
+   *
+   *  @return string
+   **/
   public function getMethod();
-
+ 
+  /**
+   *  Gets the Fieldname of the field of the entity that
+   *  is having the Overwrite applied to.
+   *
+   *  @return string
+   **/
   public function getRelatedFieldname();
-
+ 
+  /**
+   *  Gets the Field Definition information for the field
+   *  of the entity that is having the Overwrite applied to.
+   **/
   public function getDefinitionOfField();
 }

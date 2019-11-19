@@ -14,9 +14,10 @@ use Drupal\Core\Utility\Error;
 use Drupal\overwrite\EntityTypeInfo;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
+/**
+ *  implements hook_entity_load();
+ */
 function overwrite_activate_entity_load(array $entities, $entity_type_id) {
-  $is_admin = \Drupal::service('router.admin_context')->isAdminRoute();
-
   $current_path = \Drupal::service('path.current')->getPath();
   foreach($entities as $entity) {
     $entity_type = $entity->getEntityType();
@@ -41,18 +42,18 @@ function overwrite_activate_entity_load(array $entities, $entity_type_id) {
         $values = $overwrite->getFieldValue();
         $fieldname = $overwrite->getRelatedFieldname();
         switch($overwrite->getMethod()) {
-        case 'replace':
-          $entity->{$fieldname}->setValue($values->getValue());
-          break;
-        case 'append':
-          foreach($values as $value) {
-            $entity->{$fieldname}->appendItem($value->getValue());
-          }
-          break;
-        case 'prepend':
-          $field_values = $entity->{$fieldname}->getValue();
-          $entity->{$fieldname}->setValue(array_merge($values->getValue(), $field_values));
-          break;
+          case 'replace':
+            $entity->{$fieldname}->setValue($values->getValue());
+            break;
+          case 'append':
+            foreach($values as $value) {
+              $entity->{$fieldname}->appendItem($value->getValue());
+            }
+            break;
+          case 'prepend':
+            $field_values = $entity->{$fieldname}->getValue();
+            $entity->{$fieldname}->setValue(array_merge($values->getValue(), $field_values));
+            break;
         }
       }
     }
