@@ -1,9 +1,5 @@
 <?php
 
-/**
- * @file
- */
-
 use Drupal\overwrite\Controller\OverwriteController;
 
 /**
@@ -11,8 +7,12 @@ use Drupal\overwrite\Controller\OverwriteController;
  */
 function overwrite_activate_entity_load(array $entities, $entity_type_id) {
   // Do not apply overwrites to the entity edit route.
+  // There are some issues trying to get this to work in the case that
+  // the route object is NULL
   $current_route = \Drupal::routeMatch()->getRouteObject();
-  if (!$current_route || $current_route->getDefault('_entity_form')) {
+  if(!$current_route) {
+  }
+  else if ($current_route->getDefault('_entity_form')) {
     return;
   }
 

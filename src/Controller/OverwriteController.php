@@ -17,6 +17,8 @@ class OverwriteController extends ControllerBase {
    *
    *  @see Drupal\overwrite\Routing\RouteSubscriber.php
    *
+   * @param RouteMatchInterface $route_match
+   *
    * @return array
    *   Drupal form render array
    */

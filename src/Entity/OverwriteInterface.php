@@ -11,6 +11,8 @@ interface OverwriteInterface extends ContentEntityInterface {
 
   /**
    * Setter function for the field value of the Overwrite entity .
+   *
+   * @param $value
    */
   public function setFieldValue($value);
 

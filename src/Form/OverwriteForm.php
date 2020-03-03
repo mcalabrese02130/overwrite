@@ -2,6 +2,9 @@
 
 namespace Drupal\overwrite\Form;
 
+use Drupal\Core\Entity\EntityFieldManager;
+use Drupal\Core\Entity\EntityStorageException;
+use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\overwrite\Controller\OverwriteController;
@@ -10,17 +13,41 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\overwrite\Entity\Overwrite;
 use Drupal\Core\Cache\Cache;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  *
  */
 class OverwriteForm extends FormBase {
 
+  private $entityTypeManager;
+  private $entityFieldManager;
   /**
    * {@inheritdoc}
    */
   public function getFormId() {
     return 'overwrite_form';
+  }
+
+  /**
+   * Class constructor.
+   *
+   * @param EntityTypeManager $entityTypeManager
+   * @param EntityFieldManager $entityFieldManager
+   */
+  public function __construct(EntityTypeManager $entityTypeManager, EntityFieldManager $entityFieldManager) {
+    $this->entityTypeManager = $entityTypeManager;
+    $this->entityFieldManager = $entityFieldManager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity_type.manager'),
+      $container->get('entity_field.manager')
+    );
   }
 
   /**
@@ -46,8 +73,8 @@ class OverwriteForm extends FormBase {
 
     // Get an array of fields associated with the entity bundle
     $field_options = [];
-    $bundle_fields = \Drupal::entityManager()->getFieldDefinitions($entity_type, $entity->bundle());
-    $label_fieldname = \Drupal::entityTypeManager()->getDefinition($entity_type)->getKey('label');
+    $bundle_fields = $this->entityFieldManager->getFieldDefinitions($entity_type, $entity->bundle());
+    $label_fieldname = $this->entityTypeManager->getDefinition($entity_type)->getKey('label');
     foreach ($bundle_fields as $fieldname => $field) {
       if (
         get_class($field) == 'Drupal\field\Entity\FieldConfig' ||
@@ -88,7 +115,13 @@ class OverwriteForm extends FormBase {
     $trigger = $form_state->getTriggeringElement();
     if (substr($trigger['#name'], 0, 17) == 'remove-overwrite-') {
       $overwrite = Overwrite::load($trigger['#overwrite_id']);
-      $overwrite->delete();
+      try {
+        $overwrite->delete();
+      }
+      catch (EntityStorageException $e) {
+        \Drupal::logger('overwrite')->error($e->getMessage());
+      }
+
     }
 
     $overwrites = OverwriteController::getOverwrites($entity_type, $entity_id);
@@ -98,14 +131,20 @@ class OverwriteForm extends FormBase {
 
     if ($trigger['#name'] == 'field_add') {
       $values = $form_state->getValues();
-      $overwrite = entity_create('overwrite', [
+      $overwrite = Overwrite::create([
         'related_entity_type' => $values['entity_type'],
 
         'related_entity_id' => (integer) $values['entity_id'],
 
         'related_fieldname' => $values['field_select'],
       ]);
-      $overwrite->save();
+      try {
+        $overwrite->save();
+      }
+      catch(EntityStorageException $e) {
+        \Drupal::logger('overwrite')->error($e->getMessage());
+      }
+
       $form['overwrite_added'] = [
         '#type' => 'value',
         '#value' => $overwrite->id(),
@@ -149,10 +188,12 @@ class OverwriteForm extends FormBase {
     ];
 
     // Get the entity related to $overwrite.
-    $entity = entity_load($overwrite->getRelatedEntityType(), $overwrite->getRelatedEntityId());
+    $entity = $this->entityTypeManager
+      ->getStorage($overwrite->getRelatedEntityType())
+      ->load($overwrite->getRelatedEntityId());
 
     // Get form associated with the entity
-    $entity_form = \Drupal::entityTypeManager()
+    $entity_form = $this->entityTypeManager
       ->getStorage('entity_form_display')
       ->load($overwrite->getRelatedEntityType() . '.' . $entity->bundle() . '.default');
 
@@ -258,7 +299,12 @@ class OverwriteForm extends FormBase {
         }
         $overwrite->setFieldValue($data);
       }
-      $overwrite->save();
+      try {
+        $overwrite->save();
+      }
+      catch (EntityStorageException $e) {
+        \Drupal::logger('overwrite')->error($e->getMessage());
+      }
     }
     Cache::invalidateTags([$values['entity_type'] . ':' . $values['entity_id']]);
   }
